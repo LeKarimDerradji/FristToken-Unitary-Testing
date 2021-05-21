@@ -12,12 +12,9 @@ describe('FirstToken', function () {
     FirstToken = await ethers.getContractFactory('FirstToken')
     firsttoken = await FirstToken.connect(dev).deploy(owner.address, INITIAL_SUPPLY)
     await firsttoken.deployed()
-    /*
-    Il faudra transférer des tokens à nos utilisateurs de tests lorsque la fonction transfer sera implementé
     await firsttoken
       .connect(owner)
-      .transfer(alice.address, ethers.utils.parseEther('100000000'))
-      */
+      .transfer(alice.address, TRANSFER_SUPPLY)
   })
 
   describe('Deployement', function () {
@@ -36,16 +33,12 @@ describe('FirstToken', function () {
     })
 
     it('emits event Transfer when mint totalSupply', async function () {
-        
-      /*
-      Pb de récupération de l'event d'une transaction passée avec Waffle: Sofiane s'en occupe
-      await expect(
-        FirstToken.connect(dev).deploy(
-          owner.address,
-          ethers.utils.parseEther('8000000000')
-        )
-      ).to.emit(, 'Transfer').withArgs(ethers.constants.AddressZero, owner.address, ethers.utils.parseEther('8000000000'));
-      */
+
+        let receipt = await firsttoken.deployTransaction.wait()
+        let txHash = receipt.transactionHash
+        await expect(txHash)
+          .to.emit(firsttoken, 'Transfer')
+          .withArgs(ethers.constants.AddressZero, owner.address, INITIAL_SUPPLY)
     })
   })
 
