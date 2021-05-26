@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 contract FirstToken {
+
     mapping(address => uint256) private _balances;
     mapping (address => mapping (address => uint256)) private _allowed;
 
@@ -10,7 +11,9 @@ contract FirstToken {
 
     string private _name;
     string private _symbol; 
+
     uint256 private _totalSupply;
+    uint8 private _decimals; 
 
     event Transfer(address indexed sender, address indexed receipient, uint256 amount);
     event Approval(address indexed sender, address indexed spender_, uint256 addedValue);
@@ -31,6 +34,10 @@ contract FirstToken {
         return _symbol;
     }
 
+    function decimals() public view returns (uint8) {
+        return _decimals;
+    }
+
     function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
@@ -44,8 +51,8 @@ contract FirstToken {
     }
 
     function transfer(address to_, uint256 value_) public returns (bool success) {
-        require(value_ <= _balances[msg.sender]);
-        require(to_ != address(0));
+        require(value_ <= _balances[msg.sender], 'FirstToken : msg.sender doesnt possess the amount');
+        require(to_ != address(0), 'FirstToken : msg.sender must not be the address 0');
 
         _balances[msg.sender] -= value_;
         _balances[to_] += value_;
@@ -56,7 +63,7 @@ contract FirstToken {
     function transferFrom(address from_, address to_, uint256 value_) public returns (bool success) {
         require(value_ <= _balances[from_], 'FirstToken: balance of spender insuficient');
         require(value_ <= _allowed[from_][msg.sender], 'FirstToken: allowed balance is insuficient');
-        require(to_ != address(0));
+        require(to_ != address(0), 'FirstToken : can send funds to address ZERO');
 
         _balances[from_] -= value_;
         _balances[to_] += value_;
@@ -65,10 +72,10 @@ contract FirstToken {
         return true;
     }
 
-    function allowance(address spender_, uint256 addedValue_) public returns (bool success) {
+    function approve(address spender_, uint256 addedValue_) public returns (bool success) {
         require(spender_ != address(0));
 
-        _allowed[msg.sender][spender_] += addedValue_;
+        _allowed[msg.sender][spender_] = addedValue_;
         emit Approval(msg.sender, spender_, _allowed[msg.sender][spender_]);
         return true;
   }
